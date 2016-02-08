@@ -70,7 +70,7 @@ public class DESApi {
 	/*
 	 * DES Decryption
 	 */
-	public static String DES_Decrypt(byte[] ciphertext, byte[] keyBytes){
+	public static byte[] DES_Decrypt(byte[] ciphertext, byte[] keyBytes){
 		Cipher cipher;
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "DES");;
 		byte [] plainttextByte = null;
@@ -87,31 +87,59 @@ public class DESApi {
 		{
 			e.printStackTrace();
 		}
-		return new String(plainttextByte);
+		return plainttextByte;
 	}
 	
 	/*
 	 * DES finding key
 	 */
 	public static byte[] DES_FindingKey(byte[] plaintext, byte[] ciphertext, byte[] partOfKey){
-		byte[] fullKey = null;
+		byte[] fullKey = new byte[plaintext.length];
+		for(int i = 0; i < Math.min(partOfKey.length, plaintext.length); ++i){
+			fullKey[i] = partOfKey[i];
+		}
 		//Finding key
 		
+		byte[] plaintextGuess = new byte[plaintext.length];
+		while(!assertByteArraysEqual(plaintext, plaintextGuess)){
+			plaintextGuess = DES_Decrypt(ciphertext, fullKey);
+			System.out.print("--p: " + new String(plaintextGuess));
+			//printByteArray(fullKey);
+			if(!assertByteArraysEqual(plaintext, plaintextGuess))
+				incrementByteArrayByOne(fullKey);
+		}
 		return fullKey;
+	}
+	
+	private static boolean assertByteArraysEqual(byte[] array1, byte[] array2){
+		if(array1.length != array2.length)
+			return false;
+		for(int i = 0; i < array1.length; ++i){
+			if(array1[i] != array2[i])
+				return false;
+		}
+		return true;
 	}
 	
 	public static void main(String[] args){
 		// Question 1 
 		String myPlaintText = "Dee Bugg";
-		System.out.print("CipherText is: ");
+		System.out.print("Question 1: Ciphertext is ");
 		printByteArray(DES_Encrypt(myPlaintText));
 		
 		//Question 2
 		byte[] cipher2 = { (byte) 0x9D, (byte) 0x1C, (byte) 0x1D, (byte) 0x94, (byte) 0x8F, (byte) 0x21, (byte) 0x55, (byte) 0xC5};
 		byte[] key2    = { (byte) 0x46, (byte) 0xAA, (byte) 0x20, (byte) 0x1E, (byte) 0xF4, (byte) 0x3C, (byte) 0x92, (byte) 0xD2};
-		String plain2  = DES_Decrypt(cipher2, key2);
+		String plain2  = new String(DES_Decrypt(cipher2, key2));
 		System.out.println("Question 2: Plaintext is "+plain2);
 		
+		//Question 3
+		byte[] cipher3 = { (byte) 0xA5, (byte) 0x99, (byte) 0x04, (byte) 0x72, (byte) 0x39, (byte) 0x95, (byte) 0x41, (byte) 0xEC};
+		byte[] partialKey = { (byte) 0x90, (byte) 0x4E, (byte) 0xF2, (byte) 0xCC};
+		String plaintext = "Captains";
+		byte[] fullKey = DES_FindingKey(plaintext.getBytes(), cipher3, partialKey);
+		System.out.print("Question 3: Full key is: ");
+		printByteArray(fullKey);
 	}
 	
 }
