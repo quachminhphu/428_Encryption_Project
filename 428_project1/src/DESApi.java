@@ -1,6 +1,6 @@
 
 public class DESApi {
-	
+	// Useful method
 	public static void incrementByteArrayByOne(byte [] b) {    
 		// starting from back, add one and check if carry over
 		  // if no carry over, stop and return
