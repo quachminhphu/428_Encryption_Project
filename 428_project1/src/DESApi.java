@@ -6,6 +6,7 @@ import javax.crypto.spec.SecretKeySpec;
 /*
  * Question 1: Ciphertext is [E5, 0E, A6, 1E, 50, A3, D2, 69]
  * Question 2: Plaintext  is "CPSC 428"
+ * Question 3: Most recent guess was --k: [90, 4E, F2, CC, 04, 3C, AE, 2F]
  */
 
 public class DESApi {
