@@ -1,3 +1,6 @@
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
 
 public class DESApi {
 	// Useful method
@@ -32,9 +35,31 @@ public class DESApi {
 	/*
 	 * DES Encryption
 	 */
-	public static byte[] DES_Encrypt(byte[] plaintext, byte[] key){
+	public static byte[] DES_Encrypt(String plaintext){
+		Cipher cipher;
+		SecretKeySpec key;
 		byte[] ciphertext= null;
+		byte [] keyBytes;
+		byte [] plainttextByte;
+		
+		// set up key 
+		keyBytes = new byte[] {(byte) 0x7A, (byte) 0x90, (byte) 0xC8, (byte) 0x36, (byte) 0x44, (byte) 0x0E, (byte) 0x18, (byte) 0x76};
+		plainttextByte = plaintext.getBytes();
 		//encrypt
+		key = new SecretKeySpec(keyBytes, "DES");
+		
+		try
+		{
+			
+			cipher = Cipher.getInstance("DES/ECB/NoPadding");
+			cipher.init(Cipher.ENCRYPT_MODE, key);
+			
+			ciphertext= cipher.doFinal(plainttextByte);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		return ciphertext;
 	}
 	
@@ -57,5 +82,11 @@ public class DESApi {
 		return fullKey;
 	}
 	
+	public static void main(String[] args){
+		// Question 1 
+		String myPlaintText = "Dee Bugg";
+		System.out.println("CipherText is: ");
+		printByteArray(DES_Encrypt(myPlaintText));
+	}
 	
 }
