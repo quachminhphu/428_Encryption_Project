@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -103,13 +105,37 @@ public class DESApi {
 		byte[] plaintextGuess = new byte[plaintext.length];
 		while(!assertByteArraysEqual(plaintext, plaintextGuess)){
 			plaintextGuess = DES_Decrypt(ciphertext, fullKey);
-			System.out.print("--p: " + new String(plaintextGuess));
-			//printByteArray(fullKey);
+			System.out.print("--k: ");
+			printByteArray(fullKey);
 			if(!assertByteArraysEqual(plaintext, plaintextGuess))
 				incrementByteArrayByOne(fullKey);
 		}
 		return fullKey;
 	}
+	
+	/*
+	 * DES - Guessing plaintext
+	 */
+	public static ArrayList<String> DES_guessPlaintext(byte[] ciphertext, byte[] partialKey, int iterations){
+		ArrayList<String> result = new ArrayList<String>();
+		
+		byte[] key = new byte[ciphertext.length];
+		byte[] plaintext = null;
+		for(int i = 0; i < Math.min(key.length, partialKey.length); ++i){
+			key[i] = partialKey[i];
+		}
+		
+		for(int i = 0; i < iterations; ++i){
+			plaintext = DES_Decrypt(ciphertext, key);
+			if(isOnlyAscii(plaintext)){
+				result.add("p: " + new String(plaintext) + " |k: " + new String(key));
+			}
+			incrementByteArrayByOne(key);
+		}
+		
+		return result;
+	}
+	
 	
 	private static boolean assertByteArraysEqual(byte[] array1, byte[] array2){
 		if(array1.length != array2.length)
@@ -119,6 +145,22 @@ public class DESApi {
 				return false;
 		}
 		return true;
+	}
+	
+	//TODO: Implement
+	private static boolean isOnlyAscii(byte[] array){
+		for(byte b : array){
+			//If is whitespace...
+			if (b == (byte) 0x20)
+				return true;
+			//Or uppercse...
+			if (b >= (byte) 0x41 && b <= (byte) 0x5A)
+				return true;
+			//Or lowercase...
+			if(b >= (byte) 0x61 && b <= (byte)0x7A)
+				return true;
+		}
+		return false;
 	}
 	
 	public static void main(String[] args){
@@ -140,6 +182,8 @@ public class DESApi {
 		byte[] fullKey = DES_FindingKey(plaintext.getBytes(), cipher3, partialKey);
 		System.out.print("Question 3: Full key is: ");
 		printByteArray(fullKey);
+		
+		//Question 4
 	}
 	
 }
