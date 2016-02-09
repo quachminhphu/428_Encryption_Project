@@ -95,13 +95,12 @@ public class DESApi {
 	/*
 	 * DES finding key
 	 */
-	public static byte[] DES_FindingKey(byte[] plaintext, byte[] ciphertext, byte[] partOfKey){
+	public static byte[] DES_FindingKey2(byte[] plaintext, byte[] ciphertext, byte[] partOfKey){
 		byte[] fullKey = new byte[plaintext.length];
 		for(int i = 0; i < Math.min(partOfKey.length, plaintext.length); ++i){
 			fullKey[i] = partOfKey[i];
 		}
 		//Finding key
-		
 		byte[] plaintextGuess = new byte[plaintext.length];
 		while(!assertByteArraysEqual(plaintext, plaintextGuess)){
 			plaintextGuess = DES_Decrypt(ciphertext, fullKey);
@@ -113,6 +112,28 @@ public class DESApi {
 		return fullKey;
 	}
 	
+	/*
+	 * DES finding key
+	 */
+	public static byte[] DES_FindingKey(byte[] plaintext, byte[] ciphertext, byte[] partOfKey){
+		byte[] fullKey = new byte[plaintext.length];
+		for(int i = 0; i < Math.min(partOfKey.length, plaintext.length); ++i){
+			fullKey[i] = partOfKey[i];
+		}
+		//Finding key
+		byte[] plaintextGuess = new byte[plaintext.length];
+		boolean assertArray = false;
+		assertArray = assertByteArraysEqual(plaintext, plaintextGuess);
+		while(! assertArray){
+			plaintextGuess = DES_Decrypt(ciphertext, fullKey);
+			System.out.print("--k: ");
+			printByteArray(fullKey);
+			assertArray = assertByteArraysEqual(plaintext, plaintextGuess);
+			if(!assertArray)
+				incrementByteArrayByOne(fullKey);
+		}
+		return fullKey;
+	}
 	/*
 	 * DES - Guessing plaintext
 	 */
@@ -128,7 +149,10 @@ public class DESApi {
 		for(int i = 0; i < iterations; ++i){
 			plaintext = DES_Decrypt(ciphertext, key);
 			if(isOnlyAscii(plaintext)){
-				result.add("p: " + new String(plaintext) + " |k: " + new String(key));
+				//for testing
+				String myWord = new String(plaintext);
+				System.out.println(myWord);
+				result.add("p: " + myWord + " |k: " + new String(key));
 			}
 			incrementByteArrayByOne(key);
 		}
@@ -149,16 +173,20 @@ public class DESApi {
 	
 	//TODO: Implement
 	private static boolean isOnlyAscii(byte[] array){
+		int count =0;
 		for(byte b : array){
 			//If is whitespace...
-			if (b == (byte) 0x20)
-				return true;
-			//Or uppercse...
-			if (b >= (byte) 0x41 && b <= (byte) 0x5A)
-				return true;
+			if (b == 32)
+				count++;
+			//Or uppercase...
+			if (b >= 65 && b <= 90)
+				count++;
 			//Or lowercase...
-			if(b >= (byte) 0x61 && b <= (byte)0x7A)
+			if(b >= 97 && b <= 122)
+				count++;
+			if(count >=1){
 				return true;
+			}
 		}
 		return false;
 	}
@@ -176,14 +204,19 @@ public class DESApi {
 		System.out.println("Question 2: Plaintext is "+plain2);
 		
 		//Question 3
-		byte[] cipher3 = { (byte) 0xA5, (byte) 0x99, (byte) 0x04, (byte) 0x72, (byte) 0x39, (byte) 0x95, (byte) 0x41, (byte) 0xEC};
-		byte[] partialKey = { (byte) 0x90, (byte) 0x4E, (byte) 0xF2, (byte) 0xCC};
-		String plaintext = "Captains";
+		/*
+		byte[] cipher3 = { (byte) 0x9D, (byte) 0x1C, (byte) 0x1D, (byte) 0x94, (byte) 0x8F, (byte) 0x21, (byte) 0x55, (byte) 0xC5};
+		byte[] partialKey = { (byte) 0x46, (byte) 0xAA, (byte) 0x20, (byte) 0x1E, (byte) 0xF4, (byte) 0x3C, (byte) 0x92};
+		String plaintext = "CPSC 428";
 		byte[] fullKey = DES_FindingKey(plaintext.getBytes(), cipher3, partialKey);
 		System.out.print("Question 3: Full key is: ");
 		printByteArray(fullKey);
-		
+		*/
 		//Question 4
+		byte[] cipher4 = { (byte) 0xB1, (byte) 0x80, (byte) 0xE8, (byte) 0x05, (byte) 0x4E, (byte) 0x7D, (byte) 0xD6, (byte) 0x4C};
+		byte[] key4    = { (byte) 0xBA, (byte) 0x54, (byte) 0x68, (byte) 0x08, (byte) 0x12};
+		ArrayList<String> questionList = new ArrayList<>();
+		questionList.addAll(DES_guessPlaintext(cipher4, key4, 16777216));
 	}
 	
 }
