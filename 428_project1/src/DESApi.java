@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Question 1: Ciphertext is [E5, 0E, A6, 1E, 50, A3, D2, 69]
  * Question 2: Plaintext  is "CPSC 428"
  * Question 3: Most recent guess was --k: [90, 4E, F2, CC, 04, 3C, AE, 2F]
+ * Question 4 : plaintext: Good Job |key: [BA, 54, 68, 08, 12, D4, C6, 9E]
  */
 
 public class DESApi {
@@ -27,16 +28,18 @@ public class DESApi {
 	/*
 	 * Print out a byte array in hex format
 	 */
-	public static void printByteArray(byte [] array)
+	public static String printByteArray(byte [] array)
 	    {
-		System.out.print("[");
+		String myWord="";
+		myWord = myWord+ ("[");
 		for(int i = 0; i < array.length-1; i++)
 		{
-		    System.out.print(Integer.toHexString((array[i]>>4)&0x0F).toUpperCase());
-		    System.out.print(Integer.toHexString(array[i]&0x0F).toUpperCase() + ", ");
+		    myWord = myWord + (Integer.toHexString((array[i]>>4)&0x0F).toUpperCase());
+		    myWord = myWord +(Integer.toHexString(array[i]&0x0F).toUpperCase() + ", ");
 		}
-		System.out.print(Integer.toHexString(array[array.length-1]>>4&0x0F).toUpperCase());
-		System.out.println(Integer.toHexString(array[array.length-1]&0x0F).toUpperCase() + "]");
+		myWord = myWord + (Integer.toHexString(array[array.length-1]>>4&0x0F).toUpperCase());
+		myWord = myWord +(Integer.toHexString(array[array.length-1]&0x0F).toUpperCase() + "]");
+	    return myWord;
 	    }
 	
 	/*
@@ -106,7 +109,7 @@ public class DESApi {
 		while(!assertByteArraysEqual(plaintext, plaintextGuess)){
 			plaintextGuess = DES_Decrypt(ciphertext, fullKey);
 			System.out.print("--k: ");
-			printByteArray(fullKey);
+			System.out.println (printByteArray(fullKey));
 			if(!assertByteArraysEqual(plaintext, plaintextGuess))
 				incrementByteArrayByOne(fullKey);
 		}
@@ -128,7 +131,7 @@ public class DESApi {
 		while(! assertArray){
 			plaintextGuess = DES_Decrypt(ciphertext, fullKey);
 			System.out.print("--k: ");
-			printByteArray(fullKey);
+			System.out.println(printByteArray(fullKey));
 			assertArray = assertByteArraysEqual(plaintext, plaintextGuess);
 			if(!assertArray)
 				incrementByteArrayByOne(fullKey);
@@ -148,12 +151,13 @@ public class DESApi {
 		}
 		
 		for(int i = 0; i < iterations; ++i){
+			System.out.println("---"+ i);
 			plaintext = DES_Decrypt(ciphertext, key);
 			if(isOnlyAscii(plaintext)){
 				//for testing
 				String myWord = new String(plaintext);
 				System.out.println(myWord);
-				result.add("p: " + myWord + " |k: " + new String(key));
+				result.add("p: " + myWord + " |k: " + printByteArray(key));
 			}
 			incrementByteArrayByOne(key);
 		}
@@ -174,29 +178,24 @@ public class DESApi {
 	
 	//TODO: Implement
 	private static boolean isOnlyAscii(byte[] array){
-		int count =0;
-		for(byte b : array){
-			//If is whitespace...
-			if (b == 32)
-				count++;
-			//Or uppercase...
-			if (b >= 65 && b <= 90)
-				count++;
-			//Or lowercase...
-			if(b >= 97 && b <= 122)
-				count++;
-			if(count >=1){
-				return true;
-			}
+		String myWord = new String(array);
+		
+		for(char b : myWord.toCharArray()){
+			if (isAsciiPrintable(b) == false) {
+	              return false;
+	          }
 		}
-		return false;
+		return true;
 	}
+	public static boolean isAsciiPrintable(char ch) {
+	      return ch == 32 || (ch>=64 && ch<=90) || (ch >= 97 && ch <= 122);
+	  }
 	
 	public static void main(String[] args){
 		// Question 1 
 		String myPlaintText = "Dee Bugg";
 		System.out.print("Question 1: Ciphertext is ");
-		printByteArray(DES_Encrypt(myPlaintText));
+		System.out.println (printByteArray(DES_Encrypt(myPlaintText)));
 		
 		//Question 2
 		byte[] cipher2 = { (byte) 0x9D, (byte) 0x1C, (byte) 0x1D, (byte) 0x94, (byte) 0x8F, (byte) 0x21, (byte) 0x55, (byte) 0xC5};
@@ -214,10 +213,15 @@ public class DESApi {
 		printByteArray(fullKey);
 		*/
 		//Question 4
+		
 		byte[] cipher4 = { (byte) 0xB1, (byte) 0x80, (byte) 0xE8, (byte) 0x05, (byte) 0x4E, (byte) 0x7D, (byte) 0xD6, (byte) 0x4C};
 		byte[] key4    = { (byte) 0xBA, (byte) 0x54, (byte) 0x68, (byte) 0x08, (byte) 0x12};
 		ArrayList<String> questionList = new ArrayList<>();
 		questionList.addAll(DES_guessPlaintext(cipher4, key4, 16777216));
+		for (int i=0; i<questionList.size();i++){
+			System.out.println(questionList.get(i));
+		}
+		
 	}
 	
 }
